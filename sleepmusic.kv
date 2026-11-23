@@ -1,0 +1,168 @@
+#:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
+
+# ── Sound Card Widget ──────────────────────────────────────────────
+
+<SoundCard>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(110)
+    padding: dp(10)
+    spacing: dp(5)
+
+    canvas.before:
+        Color:
+            rgba: root.card_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(14)]
+
+    Label:
+        text: root.icon_label
+        font_size: sp(26)
+        bold: True
+        size_hint_y: 0.38
+        color: root.icon_color
+
+    Label:
+        text: root.sound_name
+        font_size: sp(13)
+        size_hint_y: 0.22
+        color: root.name_color
+
+    ToggleButton:
+        id: play_btn
+        text: 'Stop' if self.state == 'down' else 'Play'
+        size_hint_y: 0.30
+        font_size: sp(13)
+        background_normal: ''
+        background_down: ''
+        background_color: root.btn_active_color if self.state == 'down' else root.btn_normal_color
+        color: root.btn_text_color
+        on_state: root.on_toggle(self.state)
+
+
+# ── Root Layout ────────────────────────────────────────────────────
+
+<RootWidget>:
+    orientation: 'vertical'
+
+    canvas.before:
+        Color:
+            rgba: root.bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # ── Top Bar ──
+    BoxLayout:
+        size_hint_y: None
+        height: dp(58)
+        padding: [dp(14), dp(8)]
+        spacing: dp(8)
+
+        canvas.before:
+            Color:
+                rgba: root.bar_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Sleep Music'
+            font_size: sp(21)
+            bold: True
+            color: root.title_color
+            halign: 'left'
+            valign: 'center'
+            text_size: self.size
+            size_hint_x: 0.38
+
+        Button:
+            text: root.theme_btn_text
+            font_size: sp(11)
+            size_hint_x: 0.17
+            background_normal: ''
+            background_color: root.theme_toggle_bg
+            color: root.btn_fg
+            on_release: root.toggle_theme()
+
+        Button:
+            text: root.timer_text
+            font_size: sp(11)
+            size_hint_x: 0.22
+            background_normal: ''
+            background_color: (0.58, 0.30, 0.12, 1) if root.timer_running else root.topbar_btn_bg
+            color: root.btn_fg
+            on_release: root.show_timer_popup()
+
+        Button:
+            text: 'Presets'
+            font_size: sp(11)
+            size_hint_x: 0.22
+            background_normal: ''
+            background_color: root.topbar_btn_bg
+            color: root.btn_fg
+            on_release: root.show_presets_popup()
+
+    # ── Loading indicator ──
+    Label:
+        id: loading_label
+        text: 'Generating ambient sounds...'
+        font_size: sp(14)
+        color: root.muted_text
+        size_hint_y: None
+        height: dp(44) if root.is_loading else 0
+        opacity: 1 if root.is_loading else 0
+
+    # ── Sound cards grid (scrollable) ──
+    ScrollView:
+        do_scroll_x: False
+        bar_color: root.scrollbar_color
+        bar_width: dp(4)
+
+        GridLayout:
+            id: sound_grid
+            cols: 2
+            spacing: dp(10)
+            padding: dp(10)
+            size_hint_y: None
+            height: self.minimum_height
+
+    # ── Bottom Bar ──
+    BoxLayout:
+        size_hint_y: None
+        height: dp(62)
+        padding: [dp(14), dp(8)]
+        spacing: dp(8)
+
+        canvas.before:
+            Color:
+                rgba: root.bar_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Master'
+            font_size: sp(11)
+            size_hint_x: 0.12
+            color: root.muted_text
+
+        Slider:
+            min: 0
+            max: 100
+            value: root.master_volume
+            size_hint_x: 0.58
+            cursor_size: (dp(22), dp(22))
+            on_value: root.on_master_volume_change(self.value)
+
+        Button:
+            text: 'Stop All'
+            font_size: sp(11)
+            size_hint_x: 0.28
+            background_normal: ''
+            background_color: root.stop_btn_bg
+            color: 1, 1, 1, 0.9
+            on_release: root.stop_all_sounds()
